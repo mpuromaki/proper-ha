@@ -49,3 +49,24 @@ to internet should ever be required, no single point of failure should ever exis
 Message protocols used are CoAP/DTLS/Messagepack for power restricted nodes and HTTPS/TLS/JSON for higher
 power nodes. These protocols are selected for the use cases in mind, but they are similar in how they
 operate which allows easier way to support both in the Proper specifications.
+
+## Service Discovery
+
+Proper Home Automation use service "prpr" for service discovery via mDNS and DS-SD.
+
+Service Discovery is used by the nodes to find Automation Servers to communicate with.
+Automation Servers can use Service Discovery to find other servers for redundancy configuration.
+
+```txt
+Namespace:
+        _prpr._tcp.local
+        _prpr._udp.local
+
+Server service type:
+        hasrv._prpr._tcp.local
+        hasrv._prpr._udp.local
+
+Server instance name:
+        {server}.hasrv._prpr._tcp.local
+        {server}.hasrv._prpr._udp.local
+```
