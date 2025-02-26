@@ -1,5 +1,8 @@
 # Proper Home Automation
 
+Documentation links:
+- [Message flows](/flows.md)
+
 ## Overview
 
 Proper Home Automation is standard for home automation system and nodes. It defines protocol
