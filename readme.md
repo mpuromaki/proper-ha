@@ -42,3 +42,7 @@ routes for the nodes for reaching the automation servers. Thread network support
 for power restricted nodes. Wifi also supports multiple access points for redundant access to the network.
 Service discovery natively supports multiple servers (and even multiple proper networks). No connection
 to internet should ever be required, no single point of failure should ever exist.
+
+Message protocols used are CoAP/DTLS/Messagepack for power restricted nodes and HTTPS/TLS/JSON for higher
+power nodes. These protocols are selected for the use cases in mind, but they are similar in how they
+operate which allows easier way to support both in the Proper specifications.
