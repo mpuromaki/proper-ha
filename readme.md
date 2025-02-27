@@ -1,5 +1,7 @@
 # Proper Home Automation
 
+⚠️ This standard is very much work in progress. There is no actual projects using this standard ⚠️
+
 Documentation links:
 - [Message flows](/flows.md)
 
