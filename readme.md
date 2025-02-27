@@ -30,7 +30,7 @@ utilize to locate the automation servers.
 Secrets management is made to be as simple as possible for the users. One shared master secret is
 defined, which is used to derive:
 - Proper network id
-- Proper node registration api-key
+- Proper pre-approval encryption pre-shared key
 - Thread network key
 - Wifi SSID and password
 
@@ -70,3 +70,82 @@ Server instance name:
         {server}.hasrv._prpr._tcp.local
         {server}.hasrv._prpr._udp.local
 ```
+
+## Security Model
+
+As stated in the overview, Proper Home Automation relies on pre-shared keys in form of proper
+master secret.
+
+While the current state of the art of home automation protocols (Thread and such) have very
+secure setups for key management, they also are extremely complicated and enterprisey. I should
+not attribute this to malice, but it seems that in practice that great security is used to keep
+users locked inside company-specific ecosystems.
+
+Using single network specific proper master secret is not as secure. But it is _a lot_ simpler.
+- It allows the protocol to derive other required keys automatically, instead of bothering the user.  
+- It effectively prevents moats, which is _extremely_ important. This needs to be available for
+anyone to implement.
+- It makes the node configuration simple. They just need any way to get one proper master secret
+on device. Hard-coding for DIY? QR-codes for camera-enabled nodes? Bluetooth configuration? blinking
+lights for serial data transfer to cheap light dependat resistor? So. Many. Options.
+
+:information_source: I know, I know. Losing single device could compromise the master secret for
+the entire automation network. I'll try to think of a way to lessen this risk. Maybe the devices
+could only store the proper master secret until approval, and after that they could store just the
+derived keys they'd need..
+
+### Key derivation
+
+There is only single configurable secret in Proper Home Automation: proper master secret. This
+secret is used to derive all other secrets and/or identifiers that are needed to connect to
+proper home automation system. This shared secret will also be used for encryption up to node
+approval. After that, node specific random pre-shared key is used for encryption.
+
+On high-level, the idea for key derivations is as follows. In more detailed documentation you'll
+note that the derivation will be a bit more complicated so that things such as Wifi SSID look
+nice to the user.
+
+```mermaid
+graph LR;
+    A[Proper Master Secret] -->|sha256 w/ 'PrprNetId'| B[Proper Network ID];
+    A -->|sha256 w/ 'PrprPreKey'| C[Proper Common Encryption Key];
+    A -->|sha256 w/ 'ThrdNetKey'| D[Thread Network Key];
+    A -->|sha256 w/ 'WifiSsid'| E[WiFi SSID];
+    A -->|sha256 w/ 'WifiPass'| F[WiFi Password];
+```
+
+### Low power nodes (LPN)
+
+```txt
+UDP -> DTLS-PSK -> CoAP -> MessagePack
+```
+
+For all messages DTLS (in PSK mode) is used for encryption. This is used for message integrity,
+confidentiality and authenticity. DTLS allows automation server to be certain that the message
+is from trusted source, that the message has not been tampered with and that the message is
+received complete.
+
+Pre-shared key used here is derived from proper master secret for pre-approval messages.
+Pre-shared key used here is node-specific secret received from automation server on approval.
+
+Using PSK simplifies the power and memory requirements and it makes the security setup much
+simpler. Using node specific key allows the messages to be attributed properly even when
+node ip-addresses might change.
+
+### High power nodes (HPN)
+
+```txt
+TCP -> TLS-PSK -> HTTPS -> JSON
+```
+
+For all messages TLS (in PSK mode) is used for encryption. This is used for message integrity,
+confidentiality and authenticity. TLS allows automation server to be certain that the message
+is from trusted source, that the message has not been tampered with and that the message is
+received complete.
+
+Pre-shared key used here is derived from proper master secret for pre-approval messages.
+Pre-shared key used here is node-specific secret received from automation server on approval.
+
+Using node specific key allows the messages to be attributed properly even when
+node ip-addresses might change. Keeping the HPN security flows closely aligned with LPN ones
+simplifies the protocol specification significantly.
