@@ -151,3 +151,22 @@ Pre-shared key used here is node-specific secret received from automation server
 Using node specific key allows the messages to be attributed properly even when
 node ip-addresses might change. Keeping the HPN security flows closely aligned with LPN ones
 simplifies the protocol specification significantly.
+
+## Latency and Interactive Nodes
+
+For nodes that require higher interactivity, such as always-on devices connected via WiFi or
+Ethernet, Proper supports long polling over both HTTPS and CoAP. This mechanism allows the server
+to hold responses until new messages are available, significantly reducing delays and improving
+responsiveness in automation systems.
+
+When a node opts for long polling, it includes the "long-poll" header with the value "true" in
+its poll request. If no messages are pending, the server withholds an immediate response and
+instead waits for a predefined timeout. During this period, if a new outgoing message appears,
+the server sends it immediately, ensuring that commands reach the node as soon as they become
+available. If no new messages arrive before the timeout expires, the server responds with
+ProperFrame::Acknowledge.
+
+This approach enhances interactivity while avoiding unnecessary polling requests, making
+communication more efficient and responsive, especially for high-power nodes that remain
+online. By extending this capability to CoAP, even low-power nodes can leverage improved
+responsiveness when their power constraints allow it.
